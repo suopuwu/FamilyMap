@@ -1,6 +1,6 @@
 package com.example.familymap
 
-import com.example.familymap.utils.Communicator
+import com.example.familymap.data.serverProxy.Communicator
 import org.junit.Assert
 import org.junit.Test
 

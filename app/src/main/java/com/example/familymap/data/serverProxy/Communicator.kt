@@ -1,19 +1,18 @@
-package com.example.familymap.utils
+package com.example.familymap.data.serverProxy
 
-import Exchange.ExchangeTypes
 import Exchange.Response
-import java.io.InputStream
+import com.example.familymap.utils.SuopJsonUtil
 import java.net.HttpURLConnection
 import java.net.URL
 
 class Communicator {
     companion object {
-        private fun communicate(
+        private fun getResponseJson(
             url: String,
             requestMethod: String,
             jsonBody: String? = null,
-            authToken: String? = null
-        ): Response {
+            authToken: String? = null,
+        ): String {
             //open the connection
             try {
                 val connection = URL(url).openConnection() as HttpURLConnection
@@ -34,24 +33,23 @@ class Communicator {
                     if (jsonBody != null) {
                         outputStream.write(jsonBody.toByteArray())
                     }
+                    return SuopJsonUtil.streamToString(errorStream ?: inputStream)
 
-                    return Response.deserialize(
-                        Json.streamToString(errorStream ?: inputStream),
-                        ExchangeTypes.RESPONSE
-                    ) as Response
                 }
             } catch (throwable: Throwable) {
                 println(throwable)
-                return Response()
+                val response = Response()
+                response.message = throwable.message
+                return response.serialize()
             }
         }
 
-        public fun get(url: String, token: String? = null): Response {
-            return communicate(url, "GET", null, token)
+        public fun get(url: String, token: String? = null): String {
+            return getResponseJson(url, "GET", null, token)
         }
 
-        public fun post(url: String, jsonBody: String? = null): Response {
-            return communicate(url, "POST", jsonBody)
+        public fun post(url: String, jsonBody: String? = null): String {
+            return getResponseJson(url, "POST", jsonBody)
         }
     }
 }

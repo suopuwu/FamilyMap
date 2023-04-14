@@ -1,24 +1,23 @@
 package com.example.familymap.ui
 
-import Exchange.ExchangeTypes
-import Exchange.Request
 import Exchange.Response
 import android.os.Bundle
-import android.text.Editable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
-import androidx.core.widget.doOnTextChanged
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.familymap.R
+import com.example.familymap.data.*
+import com.example.familymap.data.serverProxy.FamilyMembers
+import com.example.familymap.data.serverProxy.Login
+import com.example.familymap.data.serverProxy.Register
+import com.example.familymap.data.serverProxy.RelatedEvents
 import com.example.familymap.databinding.FragmentLoginBinding
-import com.example.familymap.utils.Communicator
 import kotlinx.coroutines.*
 
 class LoginFragment : Fragment() {
@@ -34,34 +33,38 @@ class LoginFragment : Fragment() {
         val view = binding.root
         navController = this.findNavController()
 
-        //listen to both buttons
-        binding.loginButton.run {
-            setOnClickListener {
-                CoroutineScope(Dispatchers.IO).launch { login() }
+        fun addEventListeners() {
+            //listen to both buttons
+            binding.loginButton.run {
+                setOnClickListener {
+                    CoroutineScope(Dispatchers.IO).launch { login() }
+                }
+                isEnabled = false
             }
-            isEnabled = false
-        }
-        binding.registerButton.run {
-            setOnClickListener {
-                CoroutineScope(Dispatchers.IO).launch { register() }
+            binding.registerButton.run {
+                setOnClickListener {
+                    CoroutineScope(Dispatchers.IO).launch { register() }
+                }
+                isEnabled = false
             }
-            isEnabled = false
-        }
 
-        //handle any input into a field
-        fun setFieldListener(field: EditText) {
-            field.doAfterTextChanged { updateButtons() }
-        }
-        setFieldListener(binding.host)
-        setFieldListener(binding.port)
-        setFieldListener(binding.username)
-        setFieldListener(binding.password)
-        setFieldListener(binding.firstName)
-        setFieldListener(binding.lastName)
-        setFieldListener(binding.email)
+            //handle any input into a field
+            fun setFieldListener(field: EditText) {
+                field.doAfterTextChanged { updateButtons() }
+            }
+            setFieldListener(binding.host)
+            setFieldListener(binding.port)
+            setFieldListener(binding.username)
+            setFieldListener(binding.password)
+            setFieldListener(binding.firstName)
+            setFieldListener(binding.lastName)
+            setFieldListener(binding.email)
 
-        //handle input from radio buttons
-        binding.genderRadio.setOnCheckedChangeListener { _, _ -> updateButtons() }
+            //handle input from radio buttons
+            binding.genderRadio.setOnCheckedChangeListener { _, _ -> updateButtons() }
+        }
+        addEventListeners()
+        updateButtons()
         return view
     }
 
@@ -84,6 +87,7 @@ class LoginFragment : Fragment() {
             binding.registerButton.isEnabled = false
             return
         }
+        //if we got past that, enable the login button
         binding.loginButton.isEnabled = true
         //if any remaining fields are empty, disable only the register button
         if (oneIfEmpty(binding.firstName) + oneIfEmpty(binding.lastName) + oneIfEmpty(binding.email) != 0 ||
@@ -92,90 +96,85 @@ class LoginFragment : Fragment() {
             binding.registerButton.isEnabled = false
             return
         }
+        //otherwise, enable the register button
         binding.registerButton.isEnabled = true
     }
 
-    //todo separate data and ui code
+    private fun getText(textBox: EditText): String {
+        return textBox.text.toString()
+    }
+
     private suspend fun login() = coroutineScope {
-        val request = Request()
-        request.run {
-            username = binding.username.text.toString()
-            password = binding.password.text.toString()
-        }
-        //todo rename when less sleepy
-        val response =
-            Communicator.post(
-                "http://${binding.host.text.toString()}:${binding.port.text.toString()}/user/login",
-                request.serialize()
-            )
-        if (response.success) {
-            //todo same as above
-            val theNewlyRegisteredPerson =
-                Communicator.get(
-                    "http://${binding.host.text.toString()}:${binding.port.text.toString()}/person/${response.personID}",
-                    response.authtoken
-                )
-            println(theNewlyRegisteredPerson.message)
-            CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(
-                    context,
-                    "login succeeded for ${theNewlyRegisteredPerson.firstName} ${theNewlyRegisteredPerson.lastName}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        val response = Login.login(
+            getText(binding.username),
+            getText(binding.password),
+            getText(binding.host),
+            getText(binding.port)
+        )
+        if (!response.success) {
+            launchToast("Login failed: ${response.message}")
         } else {
-            CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(
-                    context,
-                    "login failed: ${response.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            handleSuccessfulLoginRegisterResponse(response)
         }
     }
 
     private suspend fun register() = coroutineScope {
-        val request = Request()
-        request.run {
-            username = binding.username.text.toString()
-            password = binding.password.text.toString()
-            firstName = binding.firstName.text.toString()
-            lastName = binding.lastName.text.toString()
-            email = binding.email.text.toString()
-            gender = if (binding.maleRadio.isActivated) "m" else "f"
-        }
-        //todo rename when less sleepy
-        val response =
-            Communicator.post(
-                "http://${binding.host.text.toString()}:${binding.port.text.toString()}/user/register",
-                request.serialize()
-            )
-        if (response.success) {
-            //todo same as above
-            val theNewlyRegisteredPerson =
-                Communicator.get(
-                    "http://${binding.host.text.toString()}:${binding.port.text.toString()}/person/${response.personID}",
-                    response.authtoken
-                )
-            println(theNewlyRegisteredPerson.message)
-            CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(
-                    context,
-                    "registration succeeded for ${theNewlyRegisteredPerson.firstName} ${theNewlyRegisteredPerson.lastName}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        val response = Register.register(
+            getText(binding.username),
+            getText(binding.password),
+            getText(binding.firstName),
+            getText(binding.lastName),
+            getText(binding.email),
+            if (binding.maleRadio.isActivated) "m" else "f",
+            binding.host.text.toString(),
+            binding.port.text.toString()
+        )
+        if (!response.success) {
+            launchToast("Registration failed: ${response.message}")
         } else {
-            CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(
-                    context,
-                    "Registration failed: ${response.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            handleSuccessfulLoginRegisterResponse(response)
         }
-//        CoroutineScope(Dispatchers.Main).launch {
-//            navController.navigate(R.id.action_loginFragment_to_mapsFragment)
-//        }
+
+    }
+
+    private fun launchToast(text: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(
+                context,
+                text,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+
+    private fun handleSuccessfulLoginRegisterResponse(response: Response) {
+        Cache.run {//Set existing cache values
+            authToken = response.authtoken
+            userID = response.personID
+            host = getText(binding.host)
+            port = getText(binding.port)
+            username = getText(binding.username)
+        }
+
+        //Get related events, error if get failed, add to cache if successful
+        val relatedEventsResponse = RelatedEvents.getRelatedEvents()
+        if (!relatedEventsResponse.success) {
+            launchToast("Error: ${relatedEventsResponse.message}")
+            return
+        }
+        Cache.eventList = relatedEventsResponse.data
+
+        //get family members, error if get failed, add to cache if successful
+        val familyMembersResponse = FamilyMembers.getFamilyMembers()
+        if (!familyMembersResponse.success) {
+            launchToast("Error: ${familyMembersResponse.message}")
+            return
+        }
+        Cache.personList = familyMembersResponse.data
+        //navigate to the map fragment
+        CoroutineScope(Dispatchers.Main).launch {
+            navController.navigate(R.id.action_loginFragment_to_mapsFragment)
+        }
     }
 }

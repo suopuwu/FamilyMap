@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.SettingsActivity">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Switch
+            android:id="@+id/lifeStoryLinesToggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Show life story lines"
+            tools:ignore="UseSwitchCompatOrMaterialXml"
+            />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView2"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView1">
+
+        <Switch
+            android:id="@+id/familyTreeLinesToggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Show family tree lines"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView3"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView2">
+
+        <Switch
+            android:id="@+id/spouseLinesToggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Show spouse lines"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView4"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView3">
+
+        <Switch
+            android:id="@+id/fathersSideToggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Show father's side"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView5"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView4">
+
+        <Switch
+            android:id="@+id/mothersSideToggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Show mother's side"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView6"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView5">
+
+        <Switch
+            android:id="@+id/maleToggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Show males"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView7"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView6">
+
+        <Switch
+            android:id="@+id/femaleToggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Show females"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="207dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="4dp"
+        android:text="Logout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView7" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

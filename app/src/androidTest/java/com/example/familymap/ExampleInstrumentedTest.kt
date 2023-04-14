@@ -1,9 +1,7 @@
 package com.example.familymap
 
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.familymap.utils.Communicator
-import org.junit.Assert
+import com.example.familymap.data.serverProxy.Communicator
 
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -9,7 +9,14 @@
         android:id="@+id/mapsFragment"
         android:name="com.example.familymap.ui.MapsFragment"
         android:label="fragment_maps"
-        tools:layout="@layout/fragment_maps" />
+        tools:layout="@layout/fragment_maps" >
+        <action
+            android:id="@+id/action_mapsFragment_to_settingsActivity"
+            app:destination="@id/settingsActivity" />
+        <action
+            android:id="@+id/action_mapsFragment_to_personActivity"
+            app:destination="@id/personActivity" />
+    </fragment>
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.familymap.ui.LoginFragment"
@@ -19,4 +26,14 @@
             android:id="@+id/action_loginFragment_to_mapsFragment"
             app:destination="@id/mapsFragment" />
     </fragment>
+    <activity
+        android:id="@+id/settingsActivity"
+        android:name="com.example.familymap.ui.SettingsActivity"
+        android:label="activity_settings"
+        tools:layout="@layout/activity_settings" />
+    <activity
+        android:id="@+id/personActivity"
+        android:name="com.example.familymap.ui.PersonActivity"
+        android:label="activity_person"
+        tools:layout="@layout/activity_person" />
 </navigation>
