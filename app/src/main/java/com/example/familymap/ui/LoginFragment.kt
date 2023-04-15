@@ -151,7 +151,7 @@ class LoginFragment : Fragment() {
     private fun handleSuccessfulLoginRegisterResponse(response: Response) {
         Cache.run {//Set existing cache values
             authToken = response.authtoken
-            userID = response.personID
+            usersPersonID = response.personID
             host = getText(binding.host)
             port = getText(binding.port)
             username = getText(binding.username)
@@ -172,6 +172,8 @@ class LoginFragment : Fragment() {
             return
         }
         Cache.personList = familyMembersResponse.data
+
+        Cache.initSecondaryValues()
         //navigate to the map fragment
         CoroutineScope(Dispatchers.Main).launch {
             navController.navigate(R.id.action_loginFragment_to_mapsFragment)
