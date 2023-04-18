@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.ExpandableListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
@@ -53,7 +52,7 @@ class PersonActivity : AppCompatActivity() {
 
             familyStrings.add(
                 "${it.firstName} ${it.lastName}\n${relation}" +
-                        "${SuopConstants.STRING_SEPARATER}${if (it.gender == "f") R.drawable.female_icon else R.drawable.male_icon}"
+                        "${SuopConstants.STRING_SEPARATOR}${if (it.gender == "f") R.drawable.female_icon else R.drawable.male_icon}"
             )
             itemIDs[1].add(it.personID)
         }
@@ -64,7 +63,7 @@ class PersonActivity : AppCompatActivity() {
             Cache.getEventsForPerson(personID)?.forEach {
                 eventStrings.add(
                     "${it.eventType.uppercase()}: ${it.city}, ${it.country} (${it.year})" +
-                            "${SuopConstants.STRING_SEPARATER}${R.drawable.location_icon}"
+                            "${SuopConstants.STRING_SEPARATOR}${R.drawable.location_icon}"
                 )
                 itemIDs[0].add(it.eventID)
             }

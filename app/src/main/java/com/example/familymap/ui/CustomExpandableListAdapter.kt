@@ -5,11 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
-import com.example.familymap.R
 import com.example.familymap.databinding.ExpandableChildBinding
 import com.example.familymap.databinding.ExpandableHeaderBinding
 import com.example.familymap.utils.SuopConstants
-import java.text.FieldPosition
 
 class CustomExpandableListAdapter(
     context: Context,
@@ -53,6 +51,7 @@ class CustomExpandableListAdapter(
         parent: ViewGroup?
     ): View {
         val binding = ExpandableHeaderBinding.inflate(layoutInflater)
+        //Set text on header, with a + or - sign depending on if it's opened
         binding.expandableHeader.text =
             (if (isExpanded) "- " else "+ ") + getGroup(position).toString()
         return binding.root
@@ -66,8 +65,9 @@ class CustomExpandableListAdapter(
         parent: ViewGroup?
     ): View {
         val binding = ExpandableChildBinding.inflate(layoutInflater)
+        //Split the string into its 2 parts, the text and the icon
         val content =
-            getChild(groupPosition, childPosition).toString().split(SuopConstants.STRING_SEPARATER)
+            getChild(groupPosition, childPosition).toString().split(SuopConstants.STRING_SEPARATOR)
         binding.expandableChild.text = content[0]
         binding.expandableChild.setCompoundDrawablesWithIntrinsicBounds(content[1].toInt(), 0, 0, 0)
         return binding.root

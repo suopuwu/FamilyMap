@@ -57,6 +57,7 @@ class MapsFragment : Fragment(), MenuProvider {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        //setup the map
         super.onViewCreated(view, savedInstanceState)
         val mapView = view.findViewById<MapView>(R.id.mapView)
         mapView.onCreate(savedInstanceState)
@@ -153,6 +154,7 @@ class MapsFragment : Fragment(), MenuProvider {
             polyLines = ArrayList<Polyline>()
         }
 
+        //helper line drawing function
         fun lineFromTo(
             firstEvent: Event?,
             secondEvent: Event?,
@@ -195,6 +197,7 @@ class MapsFragment : Fragment(), MenuProvider {
             val rootEvent = Cache.getEvent(rootEventID)!!
             val rootPerson = Cache.getPerson(rootEvent.personID)!!
 
+            //draw line to their parents and call this function recursively
             fun drawLineTo(secondPersonID: String) {
                 val secondEvent = Cache.getEarliestEvent(secondPersonID)!!
                 val potentialWidth = MAX_LINE_WIDTH - (LINE_DECAY_SIZE * depth)
@@ -216,6 +219,7 @@ class MapsFragment : Fragment(), MenuProvider {
         fun drawLifeStoryLines() {
             val eventOwner = Cache.getPerson(selectedEvent.personID)!!
 
+            //get a sorted list, then draw lines in order
             var priorEvent: Event? = null
             for (event in Cache.getEventsForPerson(eventOwner.personID)!!) {
                 if (priorEvent != null) {
@@ -240,6 +244,7 @@ class MapsFragment : Fragment(), MenuProvider {
             val events = Cache.getFilteredEventList()
             currentlyEnabledEvents.clear()
 
+            //for each event, add a marker
             for (event in events) {
                 currentlyEnabledEvents.add(event.eventID)
                 val location = LatLng(event.latitude.toDouble(), event.longitude.toDouble())

@@ -28,7 +28,8 @@ class SearchResultViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     private val textViewItem = itemView.findViewById<TextView>(R.id.search_result)
 
     fun bind(text: String) {
-        val data = text.split(SuopConstants.STRING_SEPARATER)
+        //Split the data string into its two parts, the text and the icon
+        val data = text.split(SuopConstants.STRING_SEPARATOR)
         textViewItem.text = data[0]
         textViewItem.setCompoundDrawablesWithIntrinsicBounds(data[1].toIntOrNull() ?: 0, 0, 0, 0)
     }

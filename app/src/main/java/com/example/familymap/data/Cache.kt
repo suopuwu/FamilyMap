@@ -227,7 +227,7 @@ object Cache {
             addPeople(person.motherID, side)
         }
 
-        //Fill the sets, if they are not already filled.
+        //Fill the sets, if they are not already filled. Only needs to run once per login
         if (femaleMothersSideEvents.size == 0 && femaleFathersSideEvents.size == 0 &&
             maleMothersSideEvents.size == 0 && maleFathersSideEvents.size == 0
         ) {
@@ -236,11 +236,14 @@ object Cache {
         }
 
         val returnSet = HashSet<String>()
+        //add the user if their gender is currently enabled
         if (genderIncluded(userPerson))
             returnSet.add(userPerson.personID)
-        if (userPerson.spouseID != null && genderIncluded(getPerson(userPerson.spouseID))) {
+        //same thing for their spouse
+        if (userPerson.spouseID != null && genderIncluded(getPerson(userPerson.spouseID)))
             returnSet.add(userPerson.spouseID)
-        }
+
+        //add the events that are currently enabled.
         if (filterFemale) {
             if (filterMother)
                 returnSet.addAll(femaleMothersSideEvents)
@@ -307,6 +310,7 @@ object Cache {
         else "Not immediate"
     }
 
+    //check if the query is found in any of the comparison strings
     private fun stringIsFound(query: String, vararg comparisons: String): Boolean {
         var returnBoolean = false
         comparisons.forEach { comparison ->
