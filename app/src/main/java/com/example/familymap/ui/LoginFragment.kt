@@ -49,16 +49,20 @@ class LoginFragment : Fragment() {
             }
 
             //handle any input into a field
-            fun setFieldListener(field: EditText) {
-                field.doAfterTextChanged { updateButtons() }
+            fun setFieldListener(vararg field: EditText) {
+                field.forEach {
+                    it.doAfterTextChanged { updateButtons() }
+                }
             }
-            setFieldListener(binding.host)
-            setFieldListener(binding.port)
-            setFieldListener(binding.username)
-            setFieldListener(binding.password)
-            setFieldListener(binding.firstName)
-            setFieldListener(binding.lastName)
-            setFieldListener(binding.email)
+            setFieldListener(
+                binding.host,
+                binding.port,
+                binding.username,
+                binding.firstName,
+                binding.lastName,
+                binding.email
+            )
+
 
             //handle input from radio buttons
             binding.genderRadio.setOnCheckedChangeListener { _, _ -> updateButtons() }
@@ -149,13 +153,13 @@ class LoginFragment : Fragment() {
 
 
     private fun handleSuccessfulLoginRegisterResponse(response: Response) {
-        Cache.run {//Set existing cache values
-            authToken = response.authtoken
-            usersPersonID = response.personID
-            host = getText(binding.host)
-            port = getText(binding.port)
-            username = getText(binding.username)
-        }
+        Cache.setLoginInfo(
+            response.authtoken,
+            response.personID,
+            getText(binding.host),
+            getText(binding.port),
+            getText(binding.username)
+        )
 
         //Get related events, error if get failed, add to cache if successful
         val relatedEventsResponse = RelatedEvents.getRelatedEvents()

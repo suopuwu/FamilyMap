@@ -6,4 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.EventActivity">
 
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragmentForEventActivity"
+        android:name="com.example.familymap.ui.MapsFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.example.familymap.data
 
 import Model.Event
+import Model.Model
 import Model.Person
 import android.graphics.Color
 import androidx.compose.ui.text.toLowerCase
@@ -22,8 +23,23 @@ object Cache {
     private val markerHues: HashMap<String, Float> = HashMap()
     private var remainingColors = mutableSetOf<Int>()
 
+    fun setLoginInfo(
+        authTokenParam: String,
+        personIDParam: String,
+        hostParam: String,
+        portParam: String,
+        usernameParam: String
+    ) {
+        authToken = authTokenParam
+        usersPersonID = personIDParam
+        host = hostParam
+        port = portParam
+        username = usernameParam
+    }
+
     //initializes secondary values, like maps
     fun initSecondaryValues() {
+        resetFilterSets()
         fillDataMaps()
     }
 
@@ -99,7 +115,8 @@ object Cache {
     }
 
     //returns a hue for a given key, without duplicates for the first 17 keys
-    fun getHueFor(hueOwner: String): Float {
+    fun getHueFor(key: String): Float {
+        val hueOwner = key.lowercase()
         //return hue if owner already has one
         if (markerHues.containsKey(hueOwner)) {
             return markerHues[hueOwner]!!
@@ -107,7 +124,7 @@ object Cache {
         //when initialized, or when all colors somehow run out, regenerate them
         if (remainingColors.size == 0) {
             //Step value determines how many colors are in the set.
-            for (i in 0..359 step 20) {//360 crashes the program
+            for (i in 0..359 step 30) {//360 crashes the program
                 remainingColors.add(i)
             }
         }
@@ -125,11 +142,11 @@ object Cache {
         return Color.HSVToColor(floatArrayOf(hue, 0.8F, 0.65F))
     }
 
-    fun getPerson(personID: String): Person? {
+    fun getPerson(personID: String?): Person? {
         return internalPersonMap[personID]
     }
 
-    fun getEvent(eventID: String): Event? {
+    fun getEvent(eventID: String?): Event? {
         return internalEventMap[eventID]
     }
 
@@ -148,62 +165,187 @@ object Cache {
         return null
     }
 
-    fun getEarliestEvent(personID: String): Event? {
-        return getEventsForPerson(personID)?.first()
+    fun getEarliestEvent(personID: String?): Event? {
+        return getEventsForPerson(personID ?: "")?.first()
     }
 
-    fun getFilteredEventList(): Array<Event> {
+    private fun resetFilterSets() {
+        femaleMothersSideEvents.clear()
+        maleMothersSideEvents.clear()
+        femaleFathersSideEvents.clear()
+        maleFathersSideEvents.clear()
+    }
+
+    //sets for performance, prevents filters from being regenerated every map refresh.
+    private val femaleMothersSideEvents = HashSet<String>()
+    private val maleMothersSideEvents = HashSet<String>()
+    private val femaleFathersSideEvents = HashSet<String>()
+    private val maleFathersSideEvents = HashSet<String>()
+
+    enum class Side {
+        MOTHERS,
+        FATHERS
+    }
+
+    fun getFilteredPeopleIDs(): HashSet<String> {
         val filterMother = SettingsInfo.getSetting(SettingsInfo.Option.FILTER_MOTHER)
         val filterFather = SettingsInfo.getSetting(SettingsInfo.Option.FILTER_FATHER)
         val filterMale = SettingsInfo.getSetting(SettingsInfo.Option.FILTER_MALE)
         val filterFemale = SettingsInfo.getSetting(SettingsInfo.Option.FILTER_FEMALE)
 
         //returns true if the gender of the person passed is included in the filters
-        fun genderIncluded(person: Person): Boolean {
+        fun genderIncluded(person: Person?): Boolean {
+            if (person == null)
+                return false
             return (filterMale && person.gender == "m") || (filterFemale && person.gender == "f")
         }
 
         //prep for adding people
-        val filteredPeople = ArrayList<Person>()
         val userPerson = getPerson(usersPersonID!!)!!
-        if (genderIncluded(userPerson)) {
-            filteredPeople.add(userPerson)
-        }
+
         //recursively traverses up a family tree from a person
-        fun addPeople(personID: String?) {
+        fun addPeople(personID: String?, side: Side) {
             //end condition
             if (personID == null) {
                 return
             }
             //add them to the list if their gender is included in the filter
             val person = getPerson(personID) ?: return
-            if (genderIncluded(person)) {
-                filteredPeople.add(person)
+            if (person.gender.lowercase() == "f") {
+                if (side == Side.MOTHERS)
+                    femaleMothersSideEvents.add(personID)
+                if (side == Side.FATHERS)
+                    femaleFathersSideEvents.add(personID)
+            } else {
+                if (side == Side.MOTHERS)
+                    maleMothersSideEvents.add(personID)
+                if (side == Side.FATHERS)
+                    maleFathersSideEvents.add(personID)
             }
             //call addPeople on their parents
-            addPeople(person.fatherID)
-            addPeople(person.motherID)
+            addPeople(person.fatherID, side)
+            addPeople(person.motherID, side)
         }
 
-        //add all people included by the filters
-        if (filterMother) {
-            addPeople(userPerson.motherID)
-        }
-        if (filterFather) {
-            addPeople(userPerson.fatherID)
+        //Fill the sets, if they are not already filled.
+        if (femaleMothersSideEvents.size == 0 && femaleFathersSideEvents.size == 0 &&
+            maleMothersSideEvents.size == 0 && maleFathersSideEvents.size == 0
+        ) {
+            addPeople(userPerson.motherID, Side.MOTHERS)
+            addPeople(userPerson.fatherID, Side.FATHERS)
         }
 
-        //get all events held by people in the filtered people list
-        val events = ArrayList<Event>()
-        for (event in eventList!!) {
-            for (person in filteredPeople) {
-                if (event.personID == person.personID) {//you could improve performance here if necessary with another map
-                    events.add(event)
-                    break;
-                }
+        val returnSet = HashSet<String>()
+        if (genderIncluded(userPerson))
+            returnSet.add(userPerson.personID)
+        if (userPerson.spouseID != null && genderIncluded(getPerson(userPerson.spouseID))) {
+            returnSet.add(userPerson.spouseID)
+        }
+        if (filterFemale) {
+            if (filterMother)
+                returnSet.addAll(femaleMothersSideEvents)
+            if (filterFather)
+                returnSet.addAll(femaleFathersSideEvents)
+        }
+        if (filterMale) {
+            if (filterMother)
+                returnSet.addAll(maleMothersSideEvents)
+            if (filterFather)
+                returnSet.addAll(maleFathersSideEvents)
+        }
+
+        return returnSet
+    }
+
+    fun getFilteredEventList(): Array<Event> {
+        val returnEvents = ArrayList<Event>()
+
+        fun addPersonsEvents(personID: String) {
+            internalPersonToSortedEventListMap[personID]?.let {
+                returnEvents.addAll(it)
             }
         }
 
-        return events.toTypedArray()
+        //add all events that are included in the filter
+        for (personID in getFilteredPeopleIDs()) {
+            addPersonsEvents(personID)
+        }
+        return returnEvents.toTypedArray()
+    }
+
+    //does not get siblings, as per the spec
+    fun getImmediateFamily(personID: String): ArrayList<Person> {
+        val person = getPerson(personID) ?: return arrayListOf()
+        val returnList = ArrayList<Person>()
+
+        //add mother, father, spouse
+        fun addPeople(vararg personToAddID: String?) {
+            personToAddID.forEach {
+                if (it != null)
+                    getPerson(it)?.run { returnList.add(this) }
+            }
+        }
+        addPeople(person.motherID, person.fatherID, person.spouseID)
+
+        //add all children
+        personList?.forEach {
+            //if more performance is needed, make a map here
+            if (it.fatherID == person.personID || it.motherID == person.personID) {
+                returnList.add(it)
+            }
+        }
+        return returnList
+    }
+
+    fun determineRelationship(personOne: Person, personTwo: Person): String {
+        return if (personOne.motherID != null && personOne.motherID == personTwo.personID) "Mother"
+        else if (personOne.fatherID != null && personOne.fatherID == personTwo.personID) "Father"
+        else if (personOne.spouseID != null && personOne.spouseID == personTwo.personID) "Spouse"
+        else if ((personTwo.fatherID != null && personTwo.fatherID == personOne.personID) ||
+            (personTwo.motherID != null && personTwo.motherID == personOne.personID)
+        ) "Child"
+        else "Not immediate"
+    }
+
+    private fun stringIsFound(query: String, vararg comparisons: String): Boolean {
+        var returnBoolean = false
+        comparisons.forEach { comparison ->
+            if (comparison.lowercase().contains(query.lowercase())) {
+                returnBoolean = true
+                return@forEach
+            }
+        }
+        return returnBoolean
+    }
+
+    //these two are definitely probably the most intensive functions, but optimizing would require magic
+    fun searchPeople(query: String): Array<Person> {
+        val returnList = ArrayList<Person>()
+        personList?.forEach { item ->
+            if (stringIsFound(query, "${item.firstName} ${item.lastName}")) {
+
+                returnList.add(item)
+            }
+        }
+        return returnList.toTypedArray()
+    }
+
+    //these share a lot of code, but they're different enough that it wouldn't really be feasible to share the code
+    //after doing a lot of research, kotlin arrayLists are invariant, which apparently means that ArrayList<Person>
+    //is not a subtype of ArrayList<Any>
+    fun searchEvents(query: String): Array<Event> {
+        val returnList = ArrayList<Event>()
+        getFilteredEventList().forEach { item ->
+            if (stringIsFound(
+                    query,
+                    "${item.country}, ${item.city}",
+                    item.year.toString(),
+                    item.eventType
+                )
+            ) {
+                returnList.add(item)
+            }
+        }
+        return returnList.toTypedArray()
     }
 }

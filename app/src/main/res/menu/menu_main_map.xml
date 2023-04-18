@@ -3,11 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:ignore="AlwaysShowAction">
-    <item
-        android:id="@+id/app_bar_search"
+    <item android:id="@+id/searchIcon"
         android:icon="@drawable/search_icon"
-        android:title="Search"
-        app:actionViewClass="android.widget.SearchView"
+        android:title="@string/search_button"
         app:showAsAction="always" />
     <item android:id="@+id/settingsIcon"
         android:icon="@drawable/settings_icon"

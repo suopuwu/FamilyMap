@@ -56,7 +56,9 @@ class SettingsActivity : AppCompatActivity() {
         //handle up button presses by closing the current activity
         when (item.itemId) {
             android.R.id.home -> {
-                finish()
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                startActivity(intent)
                 return true
             }
         }

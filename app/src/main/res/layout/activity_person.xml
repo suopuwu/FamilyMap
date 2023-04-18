@@ -6,4 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".ui.PersonActivity">
 
+    <TextView
+        android:id="@+id/personDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="TextView"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ExpandableListView
+        android:id="@+id/person_details_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="#cccccc"
+        android:dividerHeight="1dp"
+        android:groupIndicator="@null"
+        app:layout_constraintTop_toBottomOf="@+id/personDetails"
+        tools:layout_editor_absoluteX="1dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

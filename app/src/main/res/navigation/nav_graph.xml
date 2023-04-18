@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_mapsFragment_to_personActivity"
             app:destination="@id/personActivity" />
+        <action
+            android:id="@+id/action_mapsFragment_to_searchActivity"
+            app:destination="@id/searchActivity" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -36,4 +39,9 @@
         android:name="com.example.familymap.ui.PersonActivity"
         android:label="activity_person"
         tools:layout="@layout/activity_person" />
+    <activity
+        android:id="@+id/searchActivity"
+        android:name="com.example.familymap.ui.SearchActivity"
+        android:label="activity_search"
+        tools:layout="@layout/activity_search" />
 </navigation>
